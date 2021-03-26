@@ -10,3 +10,4 @@ Category_Constant[Category.bar] = 3
 Category_Constant[Category.restaurant] = 2
 Category_Constant[Category.amusement_park] = 4
 Category_Constant[Category.shopping] = 3
+Category_Constant[Category.cafe] = 2

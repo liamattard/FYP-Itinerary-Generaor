@@ -8,8 +8,9 @@ class Category(Enum):
     beach = 2
     museums = 3
     nature = 4
-    club = 5
-    bar = 6 
-    restaurant = 7
-    amusement_park = 8
-    shopping = 9
+    amusement_park = 5
+    shopping = 6
+    cafe = 7
+    club = 8
+    bar = 9
+    restaurant = 10

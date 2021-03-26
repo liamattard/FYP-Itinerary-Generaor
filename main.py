@@ -1,45 +1,29 @@
 import datetime
 
-from Entities.timetable import Timetable
+from Entities.location import Location
 from Entities.Enums.category import Category
 from Entities.place import Place
 from Entities.trip import Trip
-from Entities.trip import Characteristic
-
-# Getting all places
-all_places, max_ratings = Place.get_places()
+from Entities.characteristics import Characteristic
 
 
-# Defining a new trip
+accomodation = Place(
+    name="Sample Hotel", category=Category.accomodation,
+    location=Location(35.9543, 14.4184))
 
-accomodation = Place(name="Sample Hotel", category=Category.accomodation)
-
-character_one = Characteristic(point_of_interests=80,
-                               beach=80,
-                               museums=100,
-                               nature=40,
-                               clubbing=10,
-                               bar=60,
-                               food=50,
-                               amusement_parks=100,
-                               shopping=30)
+characteristics = Characteristic(point_of_interests=70,
+                                 beach=90,
+                                 museums=10,
+                                 nature=20,
+                                 clubbing=100,
+                                 bar=60,
+                                 food=100,
+                                 amusement_parks=40,
+                                 shopping=90)
 
 dateStart = datetime.datetime(2021, 5, 17)
 dateFinal = datetime.datetime(2021, 5, 27)
-tripOne = Trip(3, 3, [character_one], [dateStart, dateFinal])
 
+trip_one = Trip(3, 3, [characteristics], [dateStart, dateFinal], accomodation)
 
-# Calculate the time spent at each event
-for i in all_places:
-
-    time = i.get_time(tripOne)
-    print(time, "hrs at ", i.name)
-
-# Calculate distance between two places
-distance, transport = Place.get_distance(all_places[0], all_places[1])
-print("Distance between", all_places[0].name, "and",
-      all_places[1].name, " is: ", distance, "hr by ", transport.name)
-
-
-# Creating a new itinerary
-timetable = Timetable([dateStart, dateFinal], accomodation)
+trip_one.generate_itineraries()

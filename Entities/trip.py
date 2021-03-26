@@ -1,65 +1,100 @@
+import numpy as np
+import random
+
+from Entities.Enums.budget import Budget
+from Entities.place import Place
 from Entities.Enums.category import Category
 
 
-class Category_value:
-    def __init__(self, value: int, category: Category):
-        self.category = category
-        self.value = value
-
-
-class Characteristic:
-    def __init__(
-        self,
-        point_of_interests=None,
-        beach=None,
-        museums=None,
-        nature=None,
-        clubbing=None,
-        bar=None,
-        food=None,
-        amusement_parks=None,
-        shopping=None,
-    ):
-
-        super().__init__()
-
-        self.point_of_interests = Category_value(
-            point_of_interests, Category.point_of_interest
-        )
-        self.beach = Category_value(beach, Category.beach)
-        self.museums = Category_value(museums, Category.museums)
-        self.nature = Category_value(nature, Category.nature)
-        self.clubbing = Category_value(clubbing, Category.club)
-        self.bar = Category_value(bar, Category.bar)
-        self.food = Category_value(food, Category.restaurant)
-        self.amusement_parks = Category_value(amusement_parks,
-                                              Category.amusement_park)
-        self.shopping = Category_value(shopping, Category.shopping)
-
-    def get_attributes(self):
-        return [
-            self.point_of_interests,
-            self.beach,
-            self.museums,
-            self.nature,
-            self.clubbing,
-            self.bar,
-            self.food,
-            self.amusement_parks,
-            self.shopping,
-        ]
-
-
 class Trip:
-    def __init__(self, budget, moderation, characteristics, date):
+    '''
+    From this trip object a user will be able to generate itineraries
+    that are applicable to his constraints. Constraints include:
+    budget, moderation, characteristics, travel date and accomodation.
+    '''
+
+    def __init__(
+            self, budget: Budget, moderation, characteristics, date,
+            accomodation: Place):
         super().__init__()
 
         self.budget = budget
         self.moderation = moderation
         self.characteristics = characteristics
         self.date = date
+        self.accomodation = accomodation
 
-    def get_value_by_category(self, category):
-        for i in self.characteristics[0].get_attributes():
-            if i.category == category:
-                return i.value
+    def generate_random_day(self):
+
+        day = []
+        night = []
+        day_values = []
+        night_values = []
+
+        i = 1
+        while i < 11:
+            category = Category(i)
+
+            if i < 8:
+
+                day.append(category)
+                day_values.append(
+                    self.characteristics[0].get_value_by_category(category))
+            else:
+                night.append(category)
+                night_values.append(
+                    self.characteristics[0].get_value_by_category(category))
+
+            i = i + 1
+
+        day_norm = [float(i)/sum(day_values) for i in day_values]
+        day_generated = select_random(day, day_norm, self.moderation, True)
+
+        night_norm = [float(i)/sum(night_values) for i in night_values]
+        night_generated = select_random(
+            night, night_norm, self.moderation, False)
+        
+        for i in day_generated+night_generated:
+            print(random.choice(Place.of_category(i)).name)
+        # return day_generated + night_generated
+
+    def generate_itineraries(self):
+
+        all_places, max_ratings = Place.get_places(self.characteristics[0])
+        print(self.generate_random_day())
+
+        # timetable = Timetable([dateStart, dateFinal], accomodation)
+        # timetable.add_place(all_places[0], 1)
+
+
+def select_random(categories, normalised_values, moderation, day):
+    generated_places = []
+    food_added = False
+    number_of_activities = random.randint(moderation - 1, moderation + 1)
+
+    if not day:
+        generated_places.append(Category.restaurant)
+
+    if sum(normalised_values) != 0:
+
+        for i in range(number_of_activities):
+
+            random_choice = np.random.choice(categories, 1,
+                                             p=normalised_values)
+
+            while(random_choice == Category.cafe or
+                  random_choice == Category.restaurant):
+
+                random_choice = np.random.choice(categories, 1,
+                                                 p=normalised_values)
+            generated_places.append(random_choice[0])
+
+            if day and not food_added:
+                food_added = bool(random.getrandbits(1))
+                if food_added:
+                    generated_places.append(Category.cafe)
+
+    if day and not food_added:
+        generated_places.append(Category.cafe)
+
+    return generated_places
