@@ -1,32 +1,33 @@
-from enum import Enum
+
+import numpy as np
+
+from Entities.place import Place
 
 
 class Timetable():
-    def __init__(self, date, accomodation):
-        super().__init__()
-        # TODO: include months
-        number_of_days = date[1].day - date[0].day
-        days = [day] * number_of_days
-        print(days)
 
-    def add_place(self, place, day):
-        print("Yo")
+    def __init__(self, random_timetable, moderation):
 
+        timetable = np.zeros(
+            (len(random_timetable), 2+(2 * (moderation + 2))), dtype=int)
 
-class day():
-    def __init__(self):
-        super().__init__()
-        # Set Max 24 hrs
-        #  Add Accomodation time
-        self.slots = []
+        for i, day in enumerate(random_timetable):
 
+            timetable[i][1:len(day[0])+1] = day[0]
+            timetable[i][-(len(day[1])+1):-1] = day[1]
 
-class slot():
-    def __init__(self, slot_type, place):
-        super().__init__()
+        self.timetable = timetable
 
+    def __str__(self):
+        string = ""
+        for i, day in enumerate(self.timetable):
+            string = string + "Day " + str(i + 1) + "\n"
+            string = string + "---------\n"
 
-class slot_type(Enum):
-    accomodation = 0
-    place = 1
-    travel_time = 2
+            for place in day[:-1]:
+                string = string + Place.get_place_by_id(place).name
+                string = string + " -> "
+            string = string + Place.get_place_by_id(day[-1]).name
+            string = string + "\n --------- \n"
+
+        return string

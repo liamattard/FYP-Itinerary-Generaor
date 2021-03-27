@@ -11,11 +11,12 @@ accomodation = Place(
     name="Sample Hotel", category=Category.accomodation,
     location=Location(35.9543, 14.4184))
 
+
 characteristics = Characteristic(point_of_interests=70,
                                  beach=90,
-                                 museums=10,
-                                 nature=20,
-                                 clubbing=100,
+                                 museums=40,
+                                 nature=60,
+                                 clubbing=80,
                                  bar=60,
                                  food=100,
                                  amusement_parks=40,

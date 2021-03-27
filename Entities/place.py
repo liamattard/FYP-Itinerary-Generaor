@@ -37,8 +37,8 @@ class Place:
         self.location = location
         self.category = category
         self.id = id
-        id = id + 1
         place_by_id[id] = self
+        id = id + 1
 
         if time is not None:
             self.time = time
