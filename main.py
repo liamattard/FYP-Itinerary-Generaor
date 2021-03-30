@@ -25,6 +25,6 @@ characteristics = Characteristic(point_of_interests=70,
 dateStart = datetime.datetime(2021, 5, 17)
 dateFinal = datetime.datetime(2021, 5, 27)
 
-trip_one = Trip(3, 3, [characteristics], [dateStart, dateFinal], accomodation)
+trip = Trip(3, 3, [characteristics], [dateStart, dateFinal], accomodation)
 
-trip_one.generate_itineraries()
+trip.generate_itineraries()
