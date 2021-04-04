@@ -1,27 +1,30 @@
-
 import numpy as np
-import datetime
 import random
+import collections
 
 from Entities.place import Place
 from Entities.Enums.category import Category
 
 
-class Timetable():
+class Timetable:
+    def __init__(self, random_timetable=None, moderation=None, array=None):
 
-    def __init__(self, random_timetable, moderation):
+        if array is None:
+            self.moderation = moderation
 
-        self.moderation = moderation
+            timetable = np.zeros(
+                (len(random_timetable), 2 + (2 * (moderation + 2))), dtype=int
+            )
 
-        timetable = np.zeros(
-            (len(random_timetable), 2+(2 * (moderation + 2))), dtype=int)
+            for i, day in enumerate(random_timetable):
 
-        for i, day in enumerate(random_timetable):
+                timetable[i][1 : len(day[0]) + 1] = day[0]
+                timetable[i][-(len(day[1]) + 1) : -1] = day[1]
 
-            timetable[i][1:len(day[0])+1] = day[0]
-            timetable[i][-(len(day[1])+1):-1] = day[1]
+            self.timetable = timetable
 
-        self.timetable = timetable
+        else:
+            self.timetable = array
 
     def __str__(self):
         string = ""
@@ -30,23 +33,25 @@ class Timetable():
             string = string + "Day " + str(i + 1) + "\n"
             string = string + "---------\n"
 
-            duration = datetime.timedelta()
+            new_duration = 0
 
             for i, place in enumerate(day[:-1]):
 
                 current_place = Place.get_place_by_id(place)
                 string = string + current_place.name
                 string = string + ", "
-                string = string + str(current_place.category)
-                string = string + " -> "
+                string = string + str(current_place.category.value)
+                if current_place.place_name is not None:
+                    string = string + ", " + str(current_place.place_name)
+                string = string + " -> \n"
 
-                new_duration = current_place.time_to(
-                    Place.get_place_by_id(day[i+1]))[0]
-
-                duration = duration + new_duration
+                new_duration = (
+                    new_duration
+                    + current_place.time_to(Place.get_place_by_id(day[i + 1]))[0]
+                )
 
             string = string + Place.get_place_by_id(day[-1]).name
-            string = string + "\n Travel time:  " + str(duration) + " \n"
+            string = string + "\n Travel time:  " + str(new_duration) + " \n"
             string = string + "\n --------- \n"
 
         return string
@@ -57,9 +62,10 @@ class Timetable():
     @staticmethod
     def calculate_score(timetable):
 
-        y = list(map(lambda x: get_day_score(
-            x, timetable.moderation), timetable.timetable))
-        avg = sum(y)/len(y)
+        y = list(
+            map(lambda x: get_day_score(x, timetable.moderation), timetable.timetable)
+        )
+        avg = sum(y)
 
         return avg
 
@@ -71,6 +77,7 @@ class Timetable():
         day_values = []
         night_values = []
 
+        # Split categories into night and day
         i = 1
         while i < 11:
             category = Category(i)
@@ -79,11 +86,13 @@ class Timetable():
 
                 day.append(category)
                 day_values.append(
-                    trip.characteristics[0].get_value_by_category(category))
+                    trip.characteristics[0].get_value_by_category(category)
+                )
             else:
                 night.append(category)
                 night_values.append(
-                    trip.characteristics[0].get_value_by_category(category))
+                    trip.characteristics[0].get_value_by_category(category)
+                )
 
             i = i + 1
 
@@ -91,25 +100,23 @@ class Timetable():
         night.append(None)
         day_norm, night_norm = get_normalised_values(day_values, night_values)
 
-        day_generated = select_random_categories(
-            day, day_norm, trip.moderation, True)
+        day_generated = select_random_categories(day, day_norm, trip.moderation, True)
 
         night_generated = select_random_categories(
-            night, night_norm, trip.moderation, False)
+            night, night_norm, trip.moderation, False
+        )
 
         day_ids = []
 
         for i in day_generated:
 
-            day_ids.append(select_random_place(
-                i, max_ratings[i]).id)
+            day_ids.append(select_random_place(i, max_ratings[i]).id)
 
         night_ids = []
 
         for i in night_generated:
 
-            night_ids.append(select_random_place(
-                i, max_ratings[i]).id)
+            night_ids.append(select_random_place(i, max_ratings[i]).id)
 
         return [day_ids, night_ids]
 
@@ -120,36 +127,56 @@ class Timetable():
 
         for i in range(number_of_days):
 
-            random_timetable.append(
-                Timetable.generate_random_day(trip, max_ratings))
+            random_timetable.append(Timetable.generate_random_day(trip, max_ratings))
 
         return Timetable(random_timetable, trip.moderation)
 
 
 def get_day_score(day, moderation):
 
-    total_duration = datetime.timedelta()
-    total_events = set()
+    # Total number of unique events
+    total_events = set(day)
+    total_events_score = len(total_events) / (len(day) - 3)
+
     total_ratings = []
+    category_list = []
+    durations_list = []
 
     for i, place_id in enumerate(day[:-1]):
+
         place = Place.get_place_by_id(place_id)
-        total_events.add(place.name)
-        next_place = Place.get_place_by_id(day[i+1])
-        total_duration = total_duration + place.time_to(next_place)[0]
+        next_place = Place.get_place_by_id(day[i + 1])
+
+        category_list.append(place.category)
+        durations_list.append(place.time_to(next_place)[0])
+
         if place.rating is not None:
             total_ratings.append(place.rating)
+        else:
+            total_ratings.append(0.0)
 
     avg_rating = 0
     if total_ratings != []:
-        avg_rating = (sum(total_ratings)/len(total_ratings))/5.0
+        avg_rating = (sum(total_ratings) / (len(total_ratings) - 2)) / 5.0
 
-    total_events_score = len(total_events) / ((2 * moderation) + 2)
-    total_duration_score = 0
-    if total_duration.seconds != 0:
-        total_duration_score = (5400/total_duration.seconds)
+    total_durations = sum(durations_list)
 
-    total_score = total_events_score + total_duration_score + avg_rating
+    if total_durations == 0:
+        return 0
+
+    duration_score = 10 / sum(durations_list)
+
+    total_score = total_events_score + duration_score + avg_rating
+
+    counter = collections.Counter(category_list)
+
+    for i in counter:
+
+        if counter[i] > 3 and i != Category.accomodation:
+            total_score = 0
+
+    if counter[Category.restaurant] > 1 or counter[Category.cafe] > 1:
+        total_score = 0
 
     return total_score
 
@@ -158,12 +185,12 @@ def get_normalised_values(day_values, night_values):
 
     values = day_values + night_values
 
-    norm_values = [float(i)/sum(values) for i in values]
+    norm_values = [float(i) / sum(values) for i in values]
 
-    day_norm = norm_values[:len(day_values)]
-    night_norm = norm_values[-len(night_values):]
-    day_norm.append(1-sum(day_norm))
-    night_norm.append(1-sum(night_norm))
+    day_norm = norm_values[: len(day_values)]
+    night_norm = norm_values[-len(night_values) :]
+    day_norm.append(1 - sum(day_norm))
+    night_norm.append(1 - sum(night_norm))
 
     return day_norm, night_norm
 
@@ -173,13 +200,11 @@ def select_random_place(category, max_ratings):
     places_values = []
 
     for i in places:
-        places_values.append(
-            (i.no_of_ratings / max_ratings) + (i.rating / 5.0))
+        places_values.append((i.no_of_ratings / max_ratings) + (i.rating / 5.0))
 
-    norm_values = [float(i)/sum(places_values) for i in places_values]
+    norm_values = [float(i) / sum(places_values) for i in places_values]
 
-    random_choice = np.random.choice(places, 1,
-                                     p=norm_values)
+    random_choice = np.random.choice(places, 1, p=norm_values)
 
     return random.choice(random_choice)
 
@@ -196,14 +221,13 @@ def select_random_categories(categories, normalised_values, moderation, day):
 
         for i in range(number_of_activities)[1:]:
 
-            random_choice = np.random.choice(categories, 1,
-                                             p=normalised_values)
+            random_choice = np.random.choice(categories, 1, p=normalised_values)
 
-            while(random_choice == Category.cafe or
-                  random_choice == Category.restaurant):
+            while (
+                random_choice == Category.cafe or random_choice == Category.restaurant
+            ):
 
-                random_choice = np.random.choice(categories, 1,
-                                                 p=normalised_values)
+                random_choice = np.random.choice(categories, 1, p=normalised_values)
             if random_choice[0] is not None:
                 generated_places.append(random_choice[0])
 

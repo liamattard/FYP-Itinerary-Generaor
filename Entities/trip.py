@@ -5,15 +5,15 @@ from Entities.place import Place
 
 
 class Trip:
-    '''
+    """
     From this trip object a user will be able to generate itineraries
     that are applicable to his constraints. Constraints include:
     budget, moderation, characteristics, travel date and accomodation.
-    '''
+    """
 
     def __init__(
-            self, budget: Budget, moderation, characteristics, date,
-            accomodation: Place):
+        self, budget: Budget, moderation, characteristics, date, accomodation: Place
+    ):
         super().__init__()
 
         self.budget = budget
@@ -24,6 +24,7 @@ class Trip:
 
     def generate_itineraries(self):
 
-        timetables = pso.Optimise(self)
+        # pso.Optimise(self)
+        pso.Optimise_classic(self)
 
-        return timetables
+        # return timetables

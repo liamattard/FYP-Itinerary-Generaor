@@ -8,7 +8,7 @@ from Entities.characteristics import Characteristic
 
 
 accomodation = Place(
-    name="Sample Hotel", category=Category.accomodation,
+    name="Hotel", category=Category.accomodation,
     location=Location(35.9543, 14.4184))
 
 
@@ -23,8 +23,8 @@ characteristics = Characteristic(point_of_interests=70,
                                  shopping=90)
 
 dateStart = datetime.datetime(2021, 5, 17)
-dateFinal = datetime.datetime(2021, 5, 27)
+dateFinal = datetime.datetime(2021, 5, 19)
 
-trip = Trip(3, 3, [characteristics], [dateStart, dateFinal], accomodation)
+trip = Trip(3, 2, [characteristics], [dateStart, dateFinal], accomodation)
 
 trip.generate_itineraries()
