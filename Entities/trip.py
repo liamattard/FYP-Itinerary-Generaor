@@ -24,7 +24,5 @@ class Trip:
 
     def generate_itineraries(self):
 
-        # pso.Optimise(self)
         pso.Optimise_classic(self)
 
-        # return timetables

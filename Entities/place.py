@@ -13,10 +13,15 @@ from Entities.Enums.price import Price
 from os import listdir
 from os.path import isfile, join
 
-id = 0
+day_id = 0
+night_id = 0
 
-place_by_id = {}
+day_places_by_id = {}
+night_places_by_id = {}
+places_of_category = {}
 
+for i in Category:
+    places_of_category[i] = []
 
 requests_cache.install_cache("demo_cache")
 
@@ -33,11 +38,15 @@ class Place:
         category: Category = None,
         place_name=None,
         time=None,
+        is_Day=None,
+        is_accomodation=False,
     ):
 
         super().__init__()
-        global id
+        global day_id
+        global night_id
 
+        self.is_Day = is_Day
         self.name = name
         self.hours = hours
         self.price = price
@@ -45,10 +54,17 @@ class Place:
         self.no_of_ratings = no_of_ratings
         self.location = location
         self.category = category
-        self.id = id
         self.place_name = place_name
-        place_by_id[id] = self
-        id = id + 1
+
+        if not is_accomodation:
+            if is_Day:
+                self.id = day_id
+                day_places_by_id[id] = self
+                day_id += 1
+            else:
+                self.id = night_id
+                night_places_by_id[id] = self
+                night_id += 1
 
         if time is not None:
             self.time = time
@@ -59,7 +75,10 @@ class Place:
         url = url + str(self.location.y) + "," + str(self.location.x) + ";"
         url = url + str(place_two.location.y) + "," + str(place_two.location.x)
         duration = requests.get(url).json()
-        duration_time = (duration["durations"][0][1]) / 60
+        if duration["durations"][0][1] is None:
+            duration_time = 0
+        else:
+            duration_time = (duration["durations"][0][1]) / 60
 
         # distance = geopy.distance.geodesic(
         #     place_one_location, place_two_location).m
@@ -74,66 +93,57 @@ class Place:
         return duration_time, Transport.car
 
     @staticmethod
-    def get_places(characteristics):
+    def get_night_places(characteristics):
 
         all_places = []
-        path = "NearbySearch/POIs/"
-        all_places = create_place(
-            path, all_places, Category.point_of_interest, characteristics
-        )
-
-        path = "NearbySearch/beach/"
-        all_places = create_place(path, all_places, Category.beach, characteristics)
-
-        path = "NearbySearch/museums/"
-        all_places = create_place(path, all_places, Category.museums, characteristics)
-
-        path = "NearbySearch/nature/"
-        all_places = create_place(path, all_places, Category.nature, characteristics)
 
         path = "NearbySearch/night_clubs/"
-        all_places = create_place(path, all_places, Category.club, characteristics)
-
-        path = "NearbySearch/bars/"
-        all_places = create_place(path, all_places, Category.bar, characteristics)
-
-        path = "NearbySearch/restaurants/"
         all_places = create_place(
-            path, all_places, Category.restaurant, characteristics
+            path, all_places, Category.club, characteristics, is_Day=False
         )
 
-        path = "NearbySearch/amusementParks/"
+        path = "NearbySearch/bars/"
         all_places = create_place(
-            path, all_places, Category.amusement_park, characteristics
+            path, all_places, Category.bar, characteristics, is_Day=False
+        )
+
+    @staticmethod
+    def get_day_places(characteristics):
+
+        all_places = []
+
+        path = "NearbySearch/beach/"
+        all_places = create_place(
+            path, all_places, Category.beach, characteristics, is_Day=True
+        )
+
+        path = "NearbySearch/museums/"
+        all_places = create_place(
+            path, all_places, Category.museums, characteristics, is_Day=True
+        )
+
+        path = "NearbySearch/nature/"
+        all_places = create_place(
+            path, all_places, Category.nature, characteristics, is_Day=True
         )
 
         path = "NearbySearch/shopping/"
-        all_places = create_place(path, all_places, Category.shopping, characteristics)
+        all_places = create_place(
+            path, all_places, Category.shopping, characteristics, is_Day=True
+        )
 
-        path = "NearbySearch/cafeterias/"
-        all_places = create_place(path, all_places, Category.cafe, characteristics)
-
-        return all_places, max_ratings
+        return all_places
 
     @staticmethod
     def get_place_by_id(id):
-        return place_by_id[id]
+        return day_places_by_id[id]
 
     @staticmethod
     def of_category(category):
         return places_of_category[category]
 
 
-max_ratings = {}
-for i in Category:
-    max_ratings[i] = 0
-
-places_of_category = {}
-for i in Category:
-    places_of_category[i] = []
-
-
-def create_place(path, all_places, category, characteristics: Characteristic):
+def create_place(path, all_places, category, characteristics: Characteristic, is_Day):
 
     results = [f for f in listdir(path) if isfile(join(path, f))]
 
@@ -159,6 +169,8 @@ def create_place(path, all_places, category, characteristics: Characteristic):
 
                 if "vicinity" in i:
                     vicinity = i["vicinity"].split(",")[-1]
+                else:
+                    vicinity = ""
 
                 time = calculate_time(characteristics, rating, category)
 
@@ -171,21 +183,24 @@ def create_place(path, all_places, category, characteristics: Characteristic):
                     location=location,
                     time=time,
                     place_name=vicinity,
+                    is_Day=is_Day,
                 )
 
                 all_places.append(new_place)
                 places_of_category[category].append(new_place)
 
-                if max_ratings[category] < no_of_ratings:
-                    max_ratings[category] = no_of_ratings
-
     return all_places
 
 
 def calculate_time(characteristics, rating, category):
-    userPref = characteristics.get_value_by_category(category) / 100
+    userPref = characteristics.get_value_by_category(category)
+    if userPref == None:
+        userPref = 1
+    else:
+        userPref = userPref / 100
+
     rating = (rating * 20) / 100
 
-    time = userPref * rating * Category_Constant[category]
+    time = (userPref + rating) * Category_Constant[category]
     time = 0.5 * round(float(time) / 0.5)
     return time
