@@ -15,18 +15,22 @@ from os.path import isfile, join
 
 day_id = 0
 night_id = 0
+cafe_id = 0
+restaurant_id = 0
 
-day_places_by_id = {}
-night_places_by_id = {}
-places_of_category = {}
-
-for i in Category:
-    places_of_category[i] = []
 
 requests_cache.install_cache("demo_cache")
 
+places_of_category = {}
+
 
 class Place:
+
+    cafe_places_by_id = {}
+    restaurant_places_by_id = {}
+    day_places_by_id = {}
+    night_places_by_id = {}
+
     def __init__(
         self,
         name: str = None,
@@ -38,15 +42,16 @@ class Place:
         category: Category = None,
         place_name=None,
         time=None,
-        is_Day=None,
-        is_accomodation=False,
+        type=None,
     ):
 
         super().__init__()
         global day_id
         global night_id
+        global cafe_id
+        global restaurant_id
+        global places_of_category
 
-        self.is_Day = is_Day
         self.name = name
         self.hours = hours
         self.price = price
@@ -56,15 +61,23 @@ class Place:
         self.category = category
         self.place_name = place_name
 
-        if not is_accomodation:
-            if is_Day:
+        if type != 0:
+            if type == 1:
                 self.id = day_id
-                day_places_by_id[id] = self
+                Place.day_places_by_id[self.id] = self
                 day_id += 1
-            else:
+            elif type == 2:
                 self.id = night_id
-                night_places_by_id[id] = self
+                Place.night_places_by_id[self.id] = self
                 night_id += 1
+            elif type == 3:
+                self.id = cafe_id
+                Place.cafe_places_by_id[self.id] = self
+                cafe_id += 1
+            elif type == 4:
+                self.id = restaurant_id
+                Place.restaurant_places_by_id[self.id] = self
+                restaurant_id += 1
 
         if time is not None:
             self.time = time
@@ -93,46 +106,31 @@ class Place:
         return duration_time, Transport.car
 
     @staticmethod
-    def get_night_places(characteristics):
-
-        all_places = []
-
-        path = "NearbySearch/night_clubs/"
-        all_places = create_place(
-            path, all_places, Category.club, characteristics, is_Day=False
-        )
-
-        path = "NearbySearch/bars/"
-        all_places = create_place(
-            path, all_places, Category.bar, characteristics, is_Day=False
-        )
-
-    @staticmethod
-    def get_day_places(characteristics):
-
-        all_places = []
+    def set_places(characteristics):
 
         path = "NearbySearch/beach/"
-        all_places = create_place(
-            path, all_places, Category.beach, characteristics, is_Day=True
-        )
+        create_place(path, Category.beach, characteristics, type=1)
 
         path = "NearbySearch/museums/"
-        all_places = create_place(
-            path, all_places, Category.museums, characteristics, is_Day=True
-        )
+        create_place(path, Category.museums, characteristics, type=1)
 
         path = "NearbySearch/nature/"
-        all_places = create_place(
-            path, all_places, Category.nature, characteristics, is_Day=True
-        )
+        create_place(path, Category.nature, characteristics, type=1)
 
         path = "NearbySearch/shopping/"
-        all_places = create_place(
-            path, all_places, Category.shopping, characteristics, is_Day=True
-        )
+        create_place(path, Category.shopping, characteristics, type=1)
 
-        return all_places
+        path = "NearbySearch/night_clubs/"
+        create_place(path, Category.club, characteristics, type=2)
+
+        path = "NearbySearch/bars/"
+        create_place(path, Category.bar, characteristics, type=2)
+
+        path = "NearbySearch/cafeterias/"
+        create_place(path, Category.cafe, characteristics, type=3)
+
+        path = "NearbySearch/restaurants/"
+        create_place(path, Category.restaurant, characteristics, type=4)
 
     @staticmethod
     def get_place_by_id(id):
@@ -142,8 +140,16 @@ class Place:
     def of_category(category):
         return places_of_category[category]
 
+    @staticmethod
+    def remove_place(category, place):
+        places_of_category[category].remove(place)
 
-def create_place(path, all_places, category, characteristics: Characteristic, is_Day):
+    @staticmethod
+    def readd_place(place):
+        places_of_category[place.category].append(place)
+
+
+def create_place(path, category, characteristics: Characteristic, type):
 
     results = [f for f in listdir(path) if isfile(join(path, f))]
 
@@ -183,13 +189,10 @@ def create_place(path, all_places, category, characteristics: Characteristic, is
                     location=location,
                     time=time,
                     place_name=vicinity,
-                    is_Day=is_Day,
+                    type=type,
                 )
 
-                all_places.append(new_place)
                 places_of_category[category].append(new_place)
-
-    return all_places
 
 
 def calculate_time(characteristics, rating, category):
@@ -204,3 +207,7 @@ def calculate_time(characteristics, rating, category):
     time = (userPref + rating) * Category_Constant[category]
     time = 0.5 * round(float(time) / 0.5)
     return time
+
+
+for i in Category:
+    places_of_category[i] = []

@@ -10,7 +10,7 @@ def initialise_particles(trip, population_size):
 
     # Getting all places
     particles = []
-    all_places, max_ratings = Place.get_day_places(trip.characteristics[0])
+    all_places, max_ratings = Place.set_day_places(trip.characteristics[0])
     upperBound = len(all_places)
     number_of_days = (trip.date[1] - trip.date[0]).days
     global_best = None
@@ -41,8 +41,7 @@ def Optimise(trip):
     personal_acceleration = 7
     global_acceleration = 8
 
-    particles, global_best, upperBound = initialise_particles(
-        trip, population_size)
+    particles, global_best, upperBound = initialise_particles(trip, population_size)
 
     print("Initial best global score ", global_best.get_score())
 
@@ -104,8 +103,7 @@ def Optimise_classic(trip):
     global_acceleration = 2
     x = False
 
-    particles, global_best, upperBound = initialise_particles(
-        trip, population_size)
+    particles, global_best, upperBound = initialise_particles(trip, population_size)
 
     if x:
 
@@ -135,8 +133,7 @@ def Optimise_classic(trip):
 
                 personal_best_velocity = np.multiply(
                     personal_acceleration_matrix,
-                    np.subtract(particle.personal_best_position,
-                                particle.position),
+                    np.subtract(particle.personal_best_position, particle.position),
                 )
 
                 global_acceleration_matrix = np.random.randint(
@@ -149,8 +146,7 @@ def Optimise_classic(trip):
                 )
 
                 if inertia_velocity is not None:
-                    new_velocity = np.add(
-                        inertia_velocity, personal_best_velocity)
+                    new_velocity = np.add(inertia_velocity, personal_best_velocity)
                 else:
                     new_velocity = personal_best_velocity
                 new_velocity = np.add(new_velocity, global_best_velocity)

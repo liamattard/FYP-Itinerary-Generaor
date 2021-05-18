@@ -9,9 +9,10 @@ from Entities.timetable import Timetable
 
 
 accomodation = Place(
-    name="Hotel", category=Category.accomodation,
-    location=Location(35.8988, 14.5124), is_accomodation=True
-
+    name="Hotel",
+    category=Category.accomodation,
+    location=Location(35.8988, 14.5124),
+    type=0,
 )
 
 
@@ -30,9 +31,15 @@ trip = Trip(
     accomodation=accomodation,
 )
 
-Place.get_day_places(trip.characteristics[0])
-Place.get_night_places(trip.characteristics[0])
+Place.set_places(trip.characteristics[0])
 
-timetable = Timetable.generate_random_timetable(trip, )
+timetable = Timetable.generate_random_timetable(trip)
+print(timetable)
+timetable = Timetable.generate_random_timetable(trip)
+print(timetable)
+timetable = Timetable.generate_random_timetable(trip)
+print(timetable)
+timetable = Timetable.generate_random_timetable(trip)
+print(timetable)
 
 # trip.generate_itineraries()
