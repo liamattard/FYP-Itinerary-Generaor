@@ -24,5 +24,5 @@ class Trip:
 
     def generate_itineraries(self):
 
-        pso.Optimise_classic(self)
+        pso.Optimse(self)
 

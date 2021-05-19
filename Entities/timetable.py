@@ -7,21 +7,22 @@ from Entities.Enums.category import Category
 
 
 class Timetable:
-    def __init__(self, timetable=None, moderation=1):
+    def __init__(self, timetable=None, moderation=1, array=None):
 
-        self.days = []
+        if array == None:
+            self.days = []
 
-        for day in timetable:
-            morning = np.zeros((2 + moderation), dtype=np.int32)
-            evening = np.zeros(2, dtype=np.int32)
+            for day in timetable:
+                morning = np.zeros((2 + moderation), dtype=np.int32)
+                evening = np.zeros(2, dtype=np.int32)
 
-            for i, place in enumerate(day[0]):
-                morning[i] = place.id
+                for i, place in enumerate(day[0]):
+                    morning[i] = place.id
 
-            for i, place in enumerate(day[1]):
-                evening[i] = place.id
+                for i, place in enumerate(day[1]):
+                    evening[i] = place.id
 
-            self.days.append([morning, evening])
+                self.days.append([morning, evening])
 
     def __str__(self):
         string = ""
@@ -83,15 +84,20 @@ class Timetable:
         return string
 
     def update_timetable(self, new_timetable):
-        self.timetable = new_timetable
+        self.days[0][0] = new_timetable
 
     @staticmethod
-    def calculate_score(timetable):
+    def calculate_score(timetable, is_Day):
 
-        y = list(
-            map(lambda x: get_day_score(x, timetable.moderation), timetable.timetable)
-        )
-        avg = sum(y)
+        # y = list(
+        # map(lambda x: get_day_score(x, timetable.moderation), timetable.timetable)
+        # )
+        # avg = sum(y)
+
+        if is_Day:
+            avg = get_day_score(timetable.days[0][0], is_Day)
+        else:
+            avg = get_day_score(timetable.days[0][1], is_Day)
 
         return avg
 
@@ -160,51 +166,54 @@ class Timetable:
         return Timetable(random_timetable, moderation=trip.moderation)
 
 
-def get_day_score(day, moderation):
+def get_day_score(day, is_Day):
 
-    # Total number of unique events
-    total_events = set(day)
-    total_events_score = len(total_events) / (len(day) - 3)
+    if is_Day:
 
-    total_ratings = []
-    category_list = []
-    durations_list = []
+        # Total number of unique events
+        total_events = set(day)
+        if len(total_events) != len(day):
+            return 0
 
-    for i, place_id in enumerate(day[:-1]):
+        total_ratings = []
+        durations_list = []
 
-        place = Place.get_place_by_id(place_id)
-        next_place = Place.get_place_by_id(day[i + 1])
+        for i, place_id in enumerate(day):
 
-        category_list.append(place.category)
-        durations_list.append(place.time_to(next_place)[0])
+            if i != (len(day) - 1):
 
-        if place.rating is not None:
-            total_ratings.append(place.rating)
-        else:
-            total_ratings.append(0.0)
+                if i == 1:
+                    place = Place.cafe_places_by_id[place_id]
+                else:
+                    place = Place.day_places_by_id[place_id]
+                if i == 0:
+                    next_place = Place.cafe_places_by_id[day[i + 1]]
+                else:
+                    next_place = Place.day_places_by_id[day[i + 1]]
 
-    avg_rating = 0
-    if total_ratings != []:
-        avg_rating = (sum(total_ratings) / (len(total_ratings) - 2)) / 5.0
+                durations_list.append(place.time_to(next_place)[0])
 
-    total_durations = sum(durations_list)
+            if place.rating is not None:
+                total_ratings.append(place.rating)
+            else:
+                total_ratings.append(0.0)
+        avg_rating = 0
+        if total_ratings != []:
+            avg_rating = (sum(total_ratings) / len(total_ratings)) / 10.0
 
-    if total_durations == 0:
-        return 0
+        total_durations = sum(durations_list)
 
-    duration_score = 10 / sum(durations_list)
+        if total_durations == 0:
+            return 0
+        duration_score = 10 / total_durations
 
-    total_score = total_events_score + duration_score + avg_rating
+    else:
+        place_one = Place.restaurant_places_by_id[day[0]]
+        place_two = Place.night_places_by_id[day[1]]
+        duration_score = 1 / (place_one.time_to(place_two)[0])
+        avg_rating = (place_one.rating + place_two.rating) / 10
 
-    counter = collections.Counter(category_list)
-
-    for i in counter:
-
-        if counter[i] > 3 and i != Category.accomodation:
-            total_score = 0
-
-    if counter[Category.restaurant] > 1 or counter[Category.cafe] > 1:
-        total_score = 0
+    total_score = duration_score + avg_rating
 
     return total_score
 

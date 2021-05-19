@@ -31,15 +31,4 @@ trip = Trip(
     accomodation=accomodation,
 )
 
-Place.set_places(trip.characteristics[0])
-
-timetable = Timetable.generate_random_timetable(trip)
-print(timetable)
-timetable = Timetable.generate_random_timetable(trip)
-print(timetable)
-timetable = Timetable.generate_random_timetable(trip)
-print(timetable)
-timetable = Timetable.generate_random_timetable(trip)
-print(timetable)
-
-# trip.generate_itineraries()
+trip.generate_itineraries()
