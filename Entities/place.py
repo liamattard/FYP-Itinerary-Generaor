@@ -145,8 +145,35 @@ class Place:
         places_of_category[category].remove(place)
 
     @staticmethod
+    def delete_place(category, place):
+        place_id = place.id
+        places_of_category[category].remove(place)
+
+        morning = [Category.nature, Category.shopping, Category.museums, Category.beach]
+        evening = [Category.club, Category.bar]
+
+        if category == Category.cafe:
+            tool_for_delete(place_id, Place.cafe_places_by_id)
+
+        if category in Category.restaurant:
+            tool_for_delete(place_id, Place.restaurant_places_by_id)
+
+        if category in morning:
+            tool_for_delete(place_id, Place.day_places_by_id)
+
+        if category in evening:
+            tool_for_delete(place_id, Place.night_places_by_id)
+
+    @staticmethod
     def readd_place(place):
         places_of_category[place.category].append(place)
+
+
+def tool_for_delete(place_id, dictionary):
+    for i in range((place_id + 1), (len(dictionary) - 1)):
+        place = dictionary[i]
+        Place.dictionary[i].id = i - 1
+        Place.dictionary[place_id - 1] = place
 
 
 def create_place(path, category, characteristics: Characteristic, type):

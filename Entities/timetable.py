@@ -23,6 +23,9 @@ class Timetable:
                     evening[i] = place.id
 
                 self.days.append([morning, evening])
+        else:
+            self.days = []
+            self.days.append(array)
 
     def __str__(self):
         string = ""
@@ -113,6 +116,23 @@ class Timetable:
         )
 
         return [day_categories, night_categories], day_norm, night_norm
+
+    def remove_days_from_list(self):
+        for day in self.days:
+            for i, place_id in enumerate(day[0]):
+                if i == 1:
+                    place = Place.cafe_places_by_id[place_id]
+                    Place.delete_place(place.category, place)
+                else:
+                    place = Place.day_places_by_id[place_id]
+                    Place.delete_place(place.category, place)
+            for i, place_id in enumerate(day[1]):
+                if i == 0:
+                    place = Place.restaurant_places_by_id[place_id]
+                    Place.delete_place(place.category, place)
+                else:
+                    place = Place.night_places_by_id[place_id]
+                    Place.delete_place(place.category, place)
 
     @staticmethod
     def generate_random_timetable(trip):
@@ -211,7 +231,7 @@ def get_day_score(day, is_Day):
         place_one = Place.restaurant_places_by_id[day[0]]
         place_two = Place.night_places_by_id[day[1]]
         duration_score = 1 / (place_one.time_to(place_two)[0])
-        avg_rating = (place_one.rating + place_two.rating) / 10
+        avg_rating = (place_one.rating + place_two.rating) / 5
 
     total_score = duration_score + avg_rating
 

@@ -31,4 +31,5 @@ trip = Trip(
     accomodation=accomodation,
 )
 
+Place.set_places(trip.characteristics[0])
 trip.generate_itineraries()
