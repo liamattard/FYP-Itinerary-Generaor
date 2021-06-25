@@ -1,0 +1,154 @@
+Initial best score  0.8902798963346907
+Final best score  1.7143481527864746
+Initial best score  2.0728301886792457
+Final best score  2.0728301886792457
+Day 1
+---------
+...morning... 
+Grandmaster Palace Courtyard, 4 -> 
+Piadina Caffe, 7 -> 
+St. John's Co-Cathedral, 3 -> 
+Upper Barrakka Gardens, 4 -> 
+Ġnien tal-Argotti 
+ Travel time:  7.985 
+
+ --------- 
+...evening... 
+Il Pirata Restaurant, 10 -> 
+Footloose
+ Travel time:  2.2083333333333335 
+
+ --------- 
+
+Initial best score  0.7480341369746106
+Final best score  0.994036866359447
+Initial best score  2.4457142857142857
+Final best score  2.4457142857142857
+Day 1
+---------
+...morning... 
+The Point, 6 -> 
+the Crew Cafè Bar, 7 -> 
+National Museum of Natural History, 3 -> 
+Domvs Romana, 3 -> 
+The Mdina Dungeons Museum
+ Travel time:  17.36 
+
+ --------- 
+...evening... 
+Hugo's Pizza & Pasta, 10 -> 
+Alex House shot Bar
+ Travel time:  1.4583333333333333 
+
+ --------- 
+
+Initial best score  0.7202690582959641
+Final best score  1.6114134177716206
+Initial best score  2.4159904534606205
+Final best score  2.4159904534606205
+Day 1
+---------
+...morning... 
+The Knights Of Malta, 3 -> 
+La Piazza, 7 -> 
+St Paul’s Catacombs, 3 -> 
+Wignacourt Museum, 3 -> 
+Domvs Romana
+ Travel time:  8.421666666666667 
+
+ --------- 
+...evening... 
+Fresco's Cafe & Restaurant, 10 -> 
+The Exiles Beach Club
+ Travel time:  1.3966666666666667 
+
+ --------- 
+
+Initial best score  0.8231687201408096
+Final best score  0.9712084993359894
+Initial best score  4.6636018957345975
+Final best score  4.6636018957345975
+Day 1
+---------
+...morning... 
+The Limestone Heritage Park and Gardens, 4 -> 
+Saracino's Cafe`, 7 -> 
+Villa Bologna, 4 -> 
+National Museum Of Archaeology, 3 -> 
+Hastings Garden Malta
+ Travel time:  18.825000000000003 
+
+ --------- 
+...evening... 
+Legligin Wine Bar, 10 -> 
+Rocks wine bar
+ Travel time:  0.3516666666666667 
+
+ --------- 
+
+Initial best score  0.8042305475504323
+Final best score  0.849687008006459
+Initial best score  4.078850574712644
+Final best score  4.078850574712644
+Day 1
+---------
+...morning... 
+Bay Street Shopping Complex, 6 -> 
+La Crema, 7 -> 
+Malta Maritime Museum, 3 -> 
+Fort St. Angelo, 3 -> 
+Inquisitor's Palace
+ Travel time:  24.77166666666667 
+
+ --------- 
+...evening... 
+Zizka, 10 -> 
+StrEat Whisky & Bistro
+ Travel time:  0.435 
+
+ --------- 
+
+Initial best score  0.7517530915514913
+Final best score  1.1227606511950121
+Initial best score  3.1100436681222705
+Final best score  3.1100436681222705
+Day 1
+---------
+...morning... 
+Buġibba Perched Beach, 2 -> 
+Delos, 7 -> 
+Domvs Romana, 3 -> 
+Mdina Cathedral, 3 -> 
+Palazz Vilhena
+ Travel time:  14.434999999999999 
+
+ --------- 
+...evening... 
+NapolEat, 10 -> 
+The Network (St Julians, Malta)
+ Travel time:  0.7633333333333333 
+
+ --------- 
+
+Initial best score  0.7369273435274005
+Final best score  2.608273381294964
+Initial best score  2.6399999999999997
+Final best score  2.6399999999999997
+Day 1
+---------
+...morning... 
+The Mdina Dungeons Museum, 4 -> 
+Fontanella Tea Garden, 7 -> 
+Palazzo Falson, 3 -> 
+Palazz Vilhena, 3 -> 
+Mdina Cathedral
+ Travel time:  4.633333333333334 
+
+ --------- 
+...evening... 
+Hermanos Burger, 10 -> 
+Havana
+ Travel time:  1.0 
+
+ --------- 
+

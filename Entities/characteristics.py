@@ -20,19 +20,25 @@ class Characteristic:
 
         super().__init__()
 
-        categories = [beach, museums, nature, clubbing, bar, shopping]
-        normalised_categories = []
-        for i in categories:
-            normalised_categories.append((i/sum(categories)) * 100)
+        day_categories = [beach, museums, nature, shopping]
+        night_categories = [clubbing, bar]
 
-        self.beach = Category_value(normalised_categories[0], Category.beach)
-        self.museums = Category_value(
-            normalised_categories[1], Category.museums)
-        self.nature = Category_value(normalised_categories[2], Category.nature)
-        self.clubbing = Category_value(normalised_categories[3], Category.club)
-        self.bar = Category_value(normalised_categories[4], Category.bar)
-        self.shopping = Category_value(
-            normalised_categories[5], Category.shopping)
+        normalised_day = []
+        normalised_night = []
+
+        for i in day_categories:
+            normalised_day.append((i / sum(day_categories)) * 100)
+
+        for i in night_categories:
+            normalised_night.append((i / sum(night_categories)) * 100)
+
+        self.beach = Category_value(normalised_day[0], Category.beach)
+        self.museums = Category_value(normalised_day[1], Category.museums)
+        self.nature = Category_value(normalised_day[2], Category.nature)
+        self.shopping = Category_value(normalised_day[3], Category.shopping)
+
+        self.clubbing = Category_value(normalised_night[0], Category.club)
+        self.bar = Category_value(normalised_night[1], Category.bar)
 
     def get_value_by_category(self, category):
         """
@@ -56,9 +62,9 @@ class Characteristic:
         print_str = ""
         for i in self.get_attributes():
             print_str += str(i.category)
-            print_str +=  ": "
+            print_str += ": "
             print_str += str(i.value)
-            print_str += ("\n")
+            print_str += "\n"
 
         return print_str
 

@@ -16,13 +16,15 @@ def initialise_particles(trip, population_size, is_Day):
 
         timetable = Timetable.generate_random_timetable(trip)
 
-        current_particle = Particle(timetable, is_Day)
+        current_particle = Particle(timetable, is_Day, trip)
         particles.append(current_particle)
 
         if global_best is None:
             global_best = current_particle
 
-        if current_particle.get_score(is_Day) > global_best.get_score(is_Day):
+        if current_particle.get_score(is_Day, trip) > global_best.get_score(
+            is_Day, trip
+        ):
             global_best = current_particle
 
     return particles, global_best
@@ -38,10 +40,18 @@ def switch_random(original_matrix, switch_matrix):
 
 
 def Optimse(trip):
-    x = Optimise_day(trip, 10, 50, 5, 2, 2, True)
-    y = Optimise_day(trip, 3, 20, 1, 2, 2, False)
-    new_timetable = Timetable(array=[x.days[0][0], y.days[0][1]])
-    new_timetable.remove_days_from_list()
+
+    new_timetable = Timetable()
+
+    for day in range(trip.number_of_days):
+
+        x = Optimise_day(trip, 15, 50, 10, 2, 2, True)
+        y = Optimise_day(trip, 5, 3, 1, 2, 2, False)
+        new_timetable.add_a_new_day([x.days[0][0], y.days[0][1]])
+        new_timetable.remove_days_from_list(day)
+
+    new_timetable.days = []
+    return new_timetable
 
 
 def Optimise_day(
@@ -56,7 +66,7 @@ def Optimise_day(
 
     particles, global_best = initialise_particles(trip, population_size, is_Day)
 
-    global_best_score = global_best.get_score(is_Day)
+    global_best_score = global_best.get_score(is_Day, trip)
     global_best_position = global_best.position
     global_best_timetable = global_best.timetable
 
@@ -99,13 +109,12 @@ def Optimise_day(
             new_velocity = np.add(new_velocity, global_best_velocity)
 
             new_position = np.add(particle.position, new_velocity)
-            clip(new_position, is_Day)
+            new_position = clip(new_position, is_Day)
 
             particle.velocity = new_velocity
-            particle.update_timetable(new_position)
+            particle.update_timetable(new_position, is_Day)
 
-            new_score = particle.get_score(is_Day)
-            # print(global_best)
+            new_score = particle.get_score(is_Day, trip)
             if new_score > particle.personal_best_score:
 
                 particle.personal_best_score = new_score
@@ -142,12 +151,18 @@ def clip(new_position, is_Day):
                         new_position[i] = len(Place.day_places_by_id) - 1
     else:
 
-        new_position = np.array(
-            [0 if i < 0 else i for i in new_position], dtype=np.int32
-        )
+        # new_position = np.array(
+        # [0 if i < 0 else i for i in new_position], dtype=np.int32
+        # )
+
+        if new_position[0] < 0:
+            new_position[0] = 0
+        if new_position[1] < 0:
+            new_position[1] = 0
 
         if new_position[0] >= len(Place.restaurant_places_by_id):
             new_position[0] = len(Place.restaurant_places_by_id) - 1
 
         if new_position[1] >= len(Place.night_places_by_id):
             new_position[1] = len(Place.night_places_by_id) - 1
+    return new_position

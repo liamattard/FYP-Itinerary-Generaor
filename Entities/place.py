@@ -21,8 +21,6 @@ restaurant_id = 0
 
 requests_cache.install_cache("demo_cache")
 
-places_of_category = {}
-
 
 class Place:
 
@@ -30,6 +28,7 @@ class Place:
     restaurant_places_by_id = {}
     day_places_by_id = {}
     night_places_by_id = {}
+    places_of_category = {}
 
     def __init__(
         self,
@@ -50,7 +49,6 @@ class Place:
         global night_id
         global cafe_id
         global restaurant_id
-        global places_of_category
 
         self.name = name
         self.hours = hours
@@ -78,6 +76,8 @@ class Place:
                 self.id = restaurant_id
                 Place.restaurant_places_by_id[self.id] = self
                 restaurant_id += 1
+
+        Place.places_of_category[category].append(self)
 
         if time is not None:
             self.time = time
@@ -108,6 +108,25 @@ class Place:
     @staticmethod
     def set_places(characteristics):
 
+        Place.cafe_places_by_id = {}
+        Place.restaurant_places_by_id = {}
+        Place.day_places_by_id = {}
+        Place.night_places_by_id = {}
+        Place.places_of_category = {}
+
+        global day_id
+        global night_id
+        global cafe_id
+        global restaurant_id
+
+        day_id = 0
+        night_id = 0
+        cafe_id = 0
+        restaurant_id = 0
+
+        for i in Category:
+            Place.places_of_category[i] = []
+
         path = "NearbySearch/beach/"
         create_place(path, Category.beach, characteristics, type=1)
 
@@ -133,47 +152,60 @@ class Place:
         create_place(path, Category.restaurant, characteristics, type=4)
 
     @staticmethod
-    def get_place_by_id(id):
-        return day_places_by_id[id]
-
-    @staticmethod
     def of_category(category):
-        return places_of_category[category]
+        return Place.places_of_category[category]
 
     @staticmethod
     def remove_place(category, place):
-        places_of_category[category].remove(place)
+        Place.places_of_category[category].remove(place)
 
     @staticmethod
-    def delete_place(category, place):
+    def delete_place(category, place, days):
         place_id = place.id
-        places_of_category[category].remove(place)
+        Place.places_of_category[category].remove(place)
 
         morning = [Category.nature, Category.shopping, Category.museums, Category.beach]
         evening = [Category.club, Category.bar]
 
         if category == Category.cafe:
-            tool_for_delete(place_id, Place.cafe_places_by_id)
+            Place.cafe_places_by_id = tool_for_delete(
+                place_id, Place.cafe_places_by_id, days
+            )
 
-        if category in Category.restaurant:
-            tool_for_delete(place_id, Place.restaurant_places_by_id)
+        if category == Category.restaurant:
+            Place.restaurant_places_by_id = tool_for_delete(
+                place_id, Place.restaurant_places_by_id, days
+            )
 
         if category in morning:
-            tool_for_delete(place_id, Place.day_places_by_id)
+            Place.day_places_by_id = tool_for_delete(
+                place_id, Place.day_places_by_id, days
+            )
 
         if category in evening:
-            tool_for_delete(place_id, Place.night_places_by_id)
+            Place.night_places_by_id = tool_for_delete(
+                place_id, Place.night_places_by_id, days
+            )
 
     @staticmethod
     def readd_place(place):
-        places_of_category[place.category].append(place)
+        Place.places_of_category[place.category].append(place)
 
 
-def tool_for_delete(place_id, dictionary):
-    for i in range((place_id + 1), (len(dictionary) - 1)):
+def tool_for_delete(place_id, dictionary, days):
+
+    for i in range((place_id + 1), len(dictionary)):
+        # breakpoint()
         place = dictionary[i]
-        Place.dictionary[i].id = i - 1
-        Place.dictionary[place_id - 1] = place
+
+        for index, temp_place_id in enumerate(days):
+            if temp_place_id == i:
+                days[index] = i - 1
+        dictionary[i].id = i - 1
+        dictionary[i - 1] = place
+
+    dictionary.pop((len(dictionary) - 1), None)
+    return dictionary
 
 
 def create_place(path, category, characteristics: Characteristic, type):
@@ -207,7 +239,7 @@ def create_place(path, category, characteristics: Characteristic, type):
 
                 time = calculate_time(characteristics, rating, category)
 
-                new_place = Place(
+                Place(
                     name=name,
                     price=price_level,
                     rating=rating,
@@ -218,8 +250,6 @@ def create_place(path, category, characteristics: Characteristic, type):
                     place_name=vicinity,
                     type=type,
                 )
-
-                places_of_category[category].append(new_place)
 
 
 def calculate_time(characteristics, rating, category):
@@ -237,4 +267,4 @@ def calculate_time(characteristics, rating, category):
 
 
 for i in Category:
-    places_of_category[i] = []
+    Place.places_of_category[i] = []

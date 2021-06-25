@@ -1,5 +1,4 @@
-
-class Rating():
+class Rating:
     def __init__(self, rating):
         super().__init__()
 
